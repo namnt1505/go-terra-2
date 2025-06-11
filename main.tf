@@ -54,6 +54,26 @@ data "google_project" "project" {
   project_id = var.project_id
 }
 
+# Create custom service account for Cloud Build
+resource "google_service_account" "cloudbuild_service_account" {
+  account_id   = "cloudbuild-sa"
+  display_name = "Cloud Build Service Account"
+  description  = "Custom service account for Cloud Build triggers"
+}
+
+# Grant necessary permissions to the custom service account
+resource "google_project_iam_member" "cloudbuild_sa_editor" {
+  project = var.project_id
+  role    = "roles/editor"
+  member  = "serviceAccount:${google_service_account.cloudbuild_service_account.email}"
+}
+
+resource "google_project_iam_member" "cloudbuild_sa_appengine_deployer" {
+  project = var.project_id
+  role    = "roles/appengine.deployer"
+  member  = "serviceAccount:${google_service_account.cloudbuild_service_account.email}"
+}
+
 # Create App Engine application
 resource "google_app_engine_application" "app" {
   project     = var.project_id
@@ -64,12 +84,14 @@ resource "google_app_engine_application" "app" {
 
 # Cloud Build trigger for main branch
 resource "google_cloudbuild_trigger" "main_trigger" {
-  name        = "deploy-on-main-push"
-  description = "Trigger to build and deploy when pushing to main branch"
-  location    = "asia-northeast1"
-  
+  name         = "deploy-on-main-push"
+  description  = "Trigger to build and deploy when pushing to main branch"
+  project      = var.project_id
+  location     = "us-central1"
+  service_account = google_service_account.cloudbuild_service_account.id
+
   repository_event_config {
-    repository = "projects/game-460004/locations/asia-northeast1/connections/my-github-connection/repositories/go-terra-2"
+    repository = "projects/game-460004/locations/us-central1/connections/my-github-connection-us/repositories/go-terra-2-us"
     
     push {
       branch = "^main$"
@@ -78,5 +100,5 @@ resource "google_cloudbuild_trigger" "main_trigger" {
   
   filename = "cloudbuild.yaml"
   
-  depends_on = [google_project_service.cloudbuild_api]
+  depends_on = [google_project_service.cloudbuild_api, google_service_account.cloudbuild_service_account]
 }

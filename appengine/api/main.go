@@ -75,5 +75,5 @@ func main() {
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hello, World from App Engine Go API!\nKEY: %s", globalKeyValue)
+	fmt.Fprintf(w, "Hello 123, World from App Engine Go API!\nKEY: %s", globalKeyValue)
 }

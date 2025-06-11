@@ -1,0 +1,7 @@
+name: deploy-on-main-push-yaml
+description: "Trigger to build and deploy when pushing to main branch"
+filename: cloudbuild.yaml
+repositoryEventConfig:
+  repository: projects/game-460004/locations/asia-northeast1/connections/my-github-connection/repositories/go-terra-2
+  push:
+    branch: ^main$
