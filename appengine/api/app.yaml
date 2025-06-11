@@ -1,3 +1,2 @@
 runtime: go121
 instance_class: F1
-entrypoint: go run main.go
